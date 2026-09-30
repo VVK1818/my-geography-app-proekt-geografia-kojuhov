@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Викторина по географии</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f1f5f9; }
+        .quiz-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-home { display: inline-block; margin-bottom: 15px; color: #64748b; text-decoration: none; font-size: 14px; font-weight: bold; transition: 0.2s; }
+        .btn-home:hover { color: #2563eb; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .btn:hover { background: #e2e8f0; }
+        #next-btn { display: none; margin-top: 15px; width: 100%; background: #2563eb; color: white; border: none; font-weight: bold; }
+        #result { margin-top: 15px; font-weight: bold; text-align: center; font-size: 18px; }
+        #score-counter { text-align: right; font-weight: bold; color: #64748b; }
+        #result-screen { display: none; text-align: center; }
+        #grade-box { font-size: 28px; font-weight: bold; margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-card">
+    <!-- Кнопка возврата на главную -->
+    <a href="index.html" class="btn-home">← На главную</a>
+
+    <div id="quiz-box">
+        <div id="score-counter">Баллы: 0</div>
+        <h2 id="question-text">Загрузка вопроса...</h2>
+        
+        <div id="options" class="options-grid"></div>
+        <div id="result"></div>
+        
+        <button id="next-btn" class="btn" onclick="nextQuestion()">Следующий вопрос</button>
+    </div>
+
+    <div id="result-screen">
+        <h2>Викторина завершена!</h2>
+        <div id="final-score"></div>
+        <div id="grade-box"></div>
+        <div id="grade-comment"></div>
+        <button class="btn" style="margin-top: 20px;" onclick="location.reload()">Пройти ещё раз</button>
+    </div>
+</div>
+
+<!-- 1. Подключаем базу данных -->
+<script src="countries.js"></script>
+
+<!-- 2. Логика викторины -->
+<script>
+    let score = 0;
+    let questionCount = 0;
+    
+    // Используем напрямую переменную countriesData из файла countries.js
+    let keys = Object.keys(countriesData);
+    let currentCountry = {};
+
+    function loadQuestion() {
+        if (questionCount >= 15) {
+            showFinalResults();
+            return;
+        }
+
+        questionCount++;
+        document.getElementById('result').textContent = '';
+        document.getElementById('next-btn').style.display = 'none';
+
+        const randomKey = keys[Math.floor(Math.random() * keys.length)];
+        currentCountry = countriesData[randomKey];
+
+        if (Math.random() > 0.5) {
+            document.getElementById('question-text').textContent = `Какая столица у страны: ${currentCountry.name}?`;
+            generateCapitalOptions();
+        } else {
+            document.getElementById('question-text').textContent = `Какая страна имеет столицу: ${currentCountry.capital}?`;
+            generateCountryOptions();
+        }
+    }
+
+    function generateCapitalOptions() {
+        document.getElementById('options').innerHTML = '';
+        let answers = [currentCountry.capital];
+        let attempts = 0;
+
+        while (answers.length < 4 && attempts < 50) {
+            attempts++;
+            const randomKey = keys[Math.floor(Math.random() * keys.length)];
+            const country = countriesData[randomKey];
+            
+            if (country && country.capital && !answers.includes(country.capital)) {
+                answers.push(country.capital);
+            }
+        }
+
+        answers.sort(() => Math.random() - 0.5);
+
+        answers.forEach(ans => {
+            const btn = createOptionButton(ans);
+	btn.onclick = () => checkAnswer(btn, ans === currentCountry.capital, currentCountry.capital);
+            document.getElementById('options').appendChild(btn);
+        });
+    }
+
+    function generateCountryOptions() {
+        document.getElementById('options').innerHTML = '';
+        let answers = [currentCountry.name];
+        let attempts = 0;
+
+        while (answers.length < 4 && attempts < 50) {
+            attempts++;
+            const randomKey = keys[Math.floor(Math.random() * keys.length)];
+            const country = countriesData[randomKey];
+
+            if (country && country.name && !answers.includes(country.name)) {
+                answers.push(country.name);
+            }
+        }
+
+        answers.sort(() => Math.random() - 0.5);
+
+        answers.forEach(ans => {
+            const btn = createOptionButton(ans);
+            btn.onclick = () => checkAnswer(btn, ans === currentCountry.name, currentCountry.name);
+            document.getElementById('options').appendChild(btn);
+        });
+    }
+
+    function createOptionButton(text) {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.textContent = text;
+        return btn;
+    }
+
+    function checkAnswer(btn, isCorrect, correctText) {
+        const allButtons = document.querySelectorAll('#options button');
+        allButtons.forEach(b => b.disabled = true);
+
+        const resultElem = document.getElementById('result');
+
+        if (isCorrect) {
+            score++;
+            btn.style.background = '#22c55e';
+            btn.style.color = 'white';
+            resultElem.textContent = "Правильно!";
+            resultElem.style.color = '#22c55e';
+        } else {
+            btn.style.background = '#ef4444';
+            btn.style.color = 'white';
+            resultElem.textContent = "Неверно! Правильный ответ: " + correctText;
+            resultElem.style.color = '#ef4444';
+        }
+
+        document.getElementById('score-counter').textContent = "Баллы: " + score;
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        loadQuestion();
+    }
+
+    function showFinalResults() {
+        document.getElementById('quiz-box').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+
+        document.getElementById('final-score').textContent = "Вы ответили правильно на " + score + " из 15 вопросов!";
+
+        let grade = 2;
+        let comment = "";
+        let color = "#ef4444";
+
+        if (score >= 14) {
+            grade = 5; comment = "Отлично! Ты настоящий знаток географии!"; color = "#22c55e";
+        } else if (score >= 11) {
+            grade = 4; comment = "Хороший результат! Почти идеально."; color = "#2563eb";
+        } else if (score >= 8) {
+            grade = 3; comment = "Удовлетворительно. Можно подтянуть знания по карте!"; color = "#f59e0b";
+        } else {
+            grade = 2; comment = "Пока слабовато. Попробуй изучить страны и пройти ещё раз!"; color = "#ef4444";
+        }
+
+        const gradeBox = document.getElementById('grade-box');
+        gradeBox.textContent = "Ваша оценка: " + grade;
+        gradeBox.style.color = color;
+        document.getElementById('grade-comment').textContent = comment;
+    }
+
+    // Запуск первого вопроса
+    loadQuestion();
+</script>
+
+</body>
+</html>
