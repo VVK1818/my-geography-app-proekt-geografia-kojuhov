@@ -5,189 +5,455 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Викторина по географии</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f1f5f9; }
-        .quiz-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-home { display: inline-block; margin-bottom: 15px; color: #64748b; text-decoration: none; font-size: 14px; font-weight: bold; transition: 0.2s; }
-        .btn-home:hover { color: #2563eb; }
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .btn { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; cursor: pointer; font-size: 16px; transition: 0.2s; }
-        .btn:hover { background: #e2e8f0; }
-        #next-btn { display: none; margin-top: 15px; width: 100%; background: #2563eb; color: white; border: none; font-weight: bold; }
-        #result { margin-top: 15px; font-weight: bold; text-align: center; font-size: 18px; }
-        #score-counter { text-align: right; font-weight: bold; color: #64748b; }
-        #result-screen { display: none; text-align: center; }
-        #grade-box { font-size: 28px; font-weight: bold; margin: 15px 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 70%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+        }
+
+        .quiz-wrapper { max-width: 700px; width: 100%; }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            background: #334155;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover { background: #475569; }
+
+        .score-badge {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #1e293b;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #c084fc);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .quiz-card {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .question-num {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .flag-question-img {
+            display: block;
+            width: 200px;
+            height: 130px;
+            object-fit: cover;
+            margin: 0 auto 25px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            background: #0f172a;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 16px;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            background: #0f172a;
+            color: #f8fafc;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #1e293b;
+            border-color: #38bdf8;
+            transform: translateY(-2px);
+        }
+
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+        .option-btn.correct {
+            background: #22c55e !important;
+            border-color: #22c55e !important;
+            color: white;
+            opacity: 1;
+        }
+
+        .option-btn.wrong {
+            background: #ef4444 !important;
+            border-color: #ef4444 !important;
+            color: white;
+            opacity: 1;
+        }
+
+        .result-msg {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 16px;
+            min-height: 24px;
+        }
+
+        .next-btn {
+            display: none;
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            background: linear-gradient(135deg, #38bdf8, #6366f1);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .next-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* Экран результата */
+        .result-screen {
+            display: none;
+            text-align: center;
+            padding: 50px 30px;
+        }
+
+        .result-screen h2 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-score {
+            font-size: 22px;
+            color: #cbd5e1;
+            margin-bottom: 25px;
+        }
+
+        .result-grade {
+            font-size: 56px;
+            font-weight: 900;
+            margin: 20px 0;
+        }
+
+        .result-comment {
+            font-size: 18px;
+            color: #94a3b8;
+            margin-bottom: 35px;
+            line-height: 1.5;
+        }
+
+        .restart-btn {
+            display: inline-block;
+            padding: 14px 35px;
+            background: linear-gradient(135deg, #a855f7, #6366f1);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .restart-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        @media (max-width: 500px) {
+            .options-grid { grid-template-columns: 1fr; }
+            .question-text { font-size: 18px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="quiz-card">
-    <!-- Кнопка возврата на главную -->
-    <a href="index.html" class="btn-home">← На главную</a>
-
-    <div id="quiz-box">
-        <div id="score-counter">Баллы: 0</div>
-        <h2 id="question-text">Загрузка вопроса...</h2>
-        
-        <div id="options" class="options-grid"></div>
-        <div id="result"></div>
-        
-        <button id="next-btn" class="btn" onclick="nextQuestion()">Следующий вопрос</button>
+<div class="quiz-wrapper">
+    <div class="quiz-header">
+        <a href="index.html" class="back-btn">← На главную</a>
+        <div class="score-badge" id="score-badge">Баллы: 0</div>
     </div>
 
-    <div id="result-screen">
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <div class="quiz-card" id="quiz-card">
+        <div class="question-num" id="question-num">Вопрос 1 из 15</div>
+        <div class="question-text" id="question-text">Загрузка...</div>
+        <div id="flag-container"></div>
+        <div class="options-grid" id="options"></div>
+        <div class="result-msg" id="result-msg"></div>
+        <button class="next-btn" id="next-btn">Следующий вопрос →</button>
+    </div>
+
+    <div class="quiz-card result-screen" id="result-screen">
         <h2>Викторина завершена!</h2>
-        <div id="final-score"></div>
-        <div id="grade-box"></div>
-        <div id="grade-comment"></div>
-        <button class="btn" style="margin-top: 20px;" onclick="location.reload()">Пройти ещё раз</button>
+        <div class="result-score" id="result-score"></div>
+        <div class="result-grade" id="result-grade"></div>
+        <div class="result-comment" id="result-comment"></div>
+        <button class="restart-btn" onclick="location.reload()">Пройти ещё раз</button>
     </div>
 </div>
 
-<!-- 1. Подключаем базу данных -->
-<script src="countries.js"></script>
-
-<!-- 2. Логика викторины -->
+<script src="quiz-data.js"></script>
 <script>
-    let score = 0;
-    let questionCount = 0;
-    
-    // Используем напрямую переменную countriesData из файла countries.js
-    let keys = Object.keys(countriesData);
-    let currentCountry = {};
+    const TOTAL_QUESTIONS = 15;
+    const QUESTION_TYPES = ['flag', 'capital', 'region', 'currency', 'lang', 'area'];
 
-    function loadQuestion() {
-        if (questionCount >= 15) {
-            showFinalResults();
-            return;
+    let currentQuestion = 0;
+    let score = 0;
+    let currentType = null;
+    let currentCountry = null;
+    let correctAnswer = null;
+    let answered = false;
+
+    // Утилиты
+    function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    function pickRandom(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function pickUnique(arr, count, exclude) {
+        const result = [];
+        const used = new Set(exclude || []);
+        let attempts = 0;
+        while (result.length < count && attempts < 500) {
+            attempts++;
+            const item = pickRandom(arr);
+            const key = typeof item === 'object' ? JSON.stringify(item) : item;
+            if (!used.has(key)) {
+                used.add(key);
+                result.push(item);
+            }
+        }
+        return result;
+    }
+
+    // Генерация вопроса
+    function generateQuestion() {
+        const type = pickRandom(QUESTION_TYPES);
+        const country = pickRandom(QUIZ_DATA);
+        let questionText = '';
+        let answer = null;
+        let options = [];
+
+        if (type === 'flag') {
+            questionText = 'Что это за страна?';
+            answer = country.name;
+            const wrongs = pickUnique(QUIZ_DATA, 3, [country.name]).map(c => c.name);
+            options = shuffle([answer, ...wrongs]);
+        }
+        else if (type === 'capital') {
+            questionText = `Какая столица у страны ${country.name}?`;
+            answer = country.capital;
+            const wrongs = pickUnique(QUIZ_DATA, 3, [country.capital]).map(c => c.capital);
+            options = shuffle([answer, ...wrongs]);
+        }
+        else if (type === 'region') {
+            questionText = `На каком континенте находится страна ${country.name}?`;
+            answer = country.region;
+            const allRegions = ['Европа', 'Азия', 'Африка', 'Америка', 'Океания'];
+            const wrongs = allRegions.filter(r => r !== country.region);
+            options = shuffle([answer, ...wrongs.slice(0, 3)]);
+        }
+        else if (type === 'currency') {
+            questionText = `Какая валюта в стране ${country.name}?`;
+            answer = country.currency;
+            const wrongs = pickUnique(QUIZ_DATA, 3, [country.currency]).map(c => c.currency);
+            options = shuffle([answer, ...wrongs]);
+        }
+        else if (type === 'lang') {
+            questionText = `Какой официальный язык в стране ${country.name}?`;
+            answer = country.lang;
+            const wrongs = pickUnique(QUIZ_DATA, 3, [country.lang]).map(c => c.lang);
+            options = shuffle([answer, ...wrongs]);
+        }
+        else if (type === 'area') {
+            const bigger = Math.random() > 0.5;
+            const others = QUIZ_DATA.filter(c => c.name !== country.name);
+            let compared;
+            if (bigger) {
+                const candidates = others.filter(c => c.area > country.area * 1.3);
+                compared = candidates.length ? pickRandom(candidates) : pickRandom(others);
+                questionText = `Какая страна больше по площади: ${country.name} или ${compared.name}?`;
+            } else {
+                const candidates = others.filter(c => c.area < country.area * 0.7);
+                compared = candidates.length ? pickRandom(candidates) : pickRandom(others);
+                questionText = `Какая страна меньше по площади: ${country.name} или ${compared.name}?`;
+            }
+            answer = bigger
+                ? (country.area > compared.area ? country.name : compared.name)
+                : (country.area < compared.area ? country.name : compared.name);
+            options = [country.name, compared.name];
         }
 
-        questionCount++;
-        document.getElementById('result').textContent = '';
+        return { type, country, questionText, answer, options };
+    }
+
+    // Отрисовка вопроса
+    function renderQuestion() {
+        const q = generateQuestion();
+        currentType = q.type;
+        currentCountry = q.country;
+        correctAnswer = q.answer;
+        answered = false;
+
+        document.getElementById('question-num').textContent = `Вопрос ${currentQuestion + 1} из ${TOTAL_QUESTIONS}`;
+        document.getElementById('question-text').textContent = q.questionText;
+        document.getElementById('result-msg').textContent = '';
         document.getElementById('next-btn').style.display = 'none';
 
-        const randomKey = keys[Math.floor(Math.random() * keys.length)];
-        currentCountry = countriesData[randomKey];
-
-        if (Math.random() > 0.5) {
-            document.getElementById('question-text').textContent = `Какая столица у страны: ${currentCountry.name}?`;
-            generateCapitalOptions();
+        // Флаг (только для типа «flag»)
+        const flagContainer = document.getElementById('flag-container');
+        if (q.type === 'flag') {
+            flagContainer.innerHTML = `<img src="flags/${q.country.flag}.svg" class="flag-question-img" alt="Флаг">`;
         } else {
-            document.getElementById('question-text').textContent = `Какая страна имеет столицу: ${currentCountry.capital}?`;
-            generateCountryOptions();
-        }
-    }
-
-    function generateCapitalOptions() {
-        document.getElementById('options').innerHTML = '';
-        let answers = [currentCountry.capital];
-        let attempts = 0;
-
-        while (answers.length < 4 && attempts < 50) {
-            attempts++;
-            const randomKey = keys[Math.floor(Math.random() * keys.length)];
-            const country = countriesData[randomKey];
-            
-            if (country && country.capital && !answers.includes(country.capital)) {
-                answers.push(country.capital);
-            }
+            flagContainer.innerHTML = '';
         }
 
-        answers.sort(() => Math.random() - 0.5);
-
-        answers.forEach(ans => {
-            const btn = createOptionButton(ans);
-	btn.onclick = () => checkAnswer(btn, ans === currentCountry.capital, currentCountry.capital);
-            document.getElementById('options').appendChild(btn);
+        // Кнопки
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        q.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(btn, opt);
+            optionsDiv.appendChild(btn);
         });
+
+        // Прогресс
+        document.getElementById('progress-fill').style.width = ((currentQuestion / TOTAL_QUESTIONS) * 100) + '%';
     }
 
-    function generateCountryOptions() {
-        document.getElementById('options').innerHTML = '';
-        let answers = [currentCountry.name];
-        let attempts = 0;
+    // Проверка ответа
+    function checkAnswer(btn, chosen) {
+        if (answered) return;
+        answered = true;
 
-        while (answers.length < 4 && attempts < 50) {
-            attempts++;
-            const randomKey = keys[Math.floor(Math.random() * keys.length)];
-            const country = countriesData[randomKey];
-
-            if (country && country.name && !answers.includes(country.name)) {
-                answers.push(country.name);
-            }
-        }
-
-        answers.sort(() => Math.random() - 0.5);
-
-        answers.forEach(ans => {
-            const btn = createOptionButton(ans);
-            btn.onclick = () => checkAnswer(btn, ans === currentCountry.name, currentCountry.name);
-            document.getElementById('options').appendChild(btn);
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(b => {
+            b.disabled = true;
+            if (b.textContent === correctAnswer) b.classList.add('correct');
         });
-    }
 
-    function createOptionButton(text) {
-        const btn = document.createElement('button');
-        btn.className = 'btn';
-        btn.textContent = text;
-        return btn;
-    }
-
-    function checkAnswer(btn, isCorrect, correctText) {
-        const allButtons = document.querySelectorAll('#options button');
-        allButtons.forEach(b => b.disabled = true);
-
-        const resultElem = document.getElementById('result');
-
-        if (isCorrect) {
+        if (chosen === correctAnswer) {
             score++;
-            btn.style.background = '#22c55e';
-            btn.style.color = 'white';
-            resultElem.textContent = "Правильно!";
-            resultElem.style.color = '#22c55e';
+            document.getElementById('score-badge').textContent = 'Баллы: ' + score;
+            document.getElementById('result-msg').textContent = '✅ Правильно!';
+            document.getElementById('result-msg').style.color = '#22c55e';
         } else {
-            btn.style.background = '#ef4444';
-            btn.style.color = 'white';
-            resultElem.textContent = "Неверно! Правильный ответ: " + correctText;
-            resultElem.style.color = '#ef4444';
+            btn.classList.add('wrong');
+            document.getElementById('result-msg').textContent = '❌ Неверно. Правильный ответ: ' + correctAnswer;
+            document.getElementById('result-msg').style.color = '#ef4444';
         }
 
-        document.getElementById('score-counter').textContent = "Баллы: " + score;
         document.getElementById('next-btn').style.display = 'block';
     }
 
-    function nextQuestion() {
-        loadQuestion();
-    }
-
-    function showFinalResults() {
-        document.getElementById('quiz-box').style.display = 'none';
-        document.getElementById('result-screen').style.display = 'block';
-
-        document.getElementById('final-score').textContent = "Вы ответили правильно на " + score + " из 15 вопросов!";
-
-        let grade = 2;
-        let comment = "";
-        let color = "#ef4444";
-
-        if (score >= 14) {
-            grade = 5; comment = "Отлично! Ты настоящий знаток географии!"; color = "#22c55e";
-        } else if (score >= 11) {
-            grade = 4; comment = "Хороший результат! Почти идеально."; color = "#2563eb";
-        } else if (score >= 8) {
-            grade = 3; comment = "Удовлетворительно. Можно подтянуть знания по карте!"; color = "#f59e0b";
+    // Следующий вопрос
+    document.getElementById('next-btn').addEventListener('click', () => {
+        currentQuestion++;
+        if (currentQuestion >= TOTAL_QUESTIONS) {
+            showResult();
         } else {
-            grade = 2; comment = "Пока слабовато. Попробуй изучить страны и пройти ещё раз!"; color = "#ef4444";
+            renderQuestion();
         }
+    });
 
-        const gradeBox = document.getElementById('grade-box');
-        gradeBox.textContent = "Ваша оценка: " + grade;
-        gradeBox.style.color = color;
-        document.getElementById('grade-comment').textContent = comment;
+    // Итог
+    function showResult() {
+        document.getElementById('quiz-card').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('progress-fill').style.width = '100%';
+
+        document.getElementById('result-score').textContent = `Ты ответил правильно на ${score} из ${TOTAL_QUESTIONS} вопросов`;
+
+        let grade, comment, color;
+        if (score >= 14) { grade = 5; comment = 'Отлично! Ты настоящий знаток географии!'; color = '#22c55e'; }
+        else if (score >= 11) { grade = 4; comment = 'Хороший результат! Почти идеально.'; color = '#38bdf8'; }
+        else if (score >= 8) { grade = 3; comment = 'Удовлетворительно. Можно подтянуть знания!'; color = '#f59e0b'; }
+        else { grade = 2; comment = 'Слабовато. Попробуй изучить страны и пройти ещё раз!'; color = '#ef4444'; }
+
+        const g = document.getElementById('result-grade');
+        g.textContent = 'Оценка: ' + grade;
+        g.style.color = color;
+        document.getElementById('result-comment').textContent = comment;
     }
 
-    // Запуск первого вопроса
-    loadQuestion();
+    // Старт
+    renderQuestion();
 </script>
 
 </body>
