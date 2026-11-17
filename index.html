@@ -26,14 +26,38 @@
             text-align: center;
             padding: 20px;
             background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 70%);
+            position: relative;
+            overflow: hidden;
         }
 
-        .menu-content { max-width: 850px; width: 100%; }
+        /* ДОБАВЛЕНО: Фоновая карта */
+        #start-screen::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.04;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .menu-content { 
+            max-width: 850px; 
+            width: 100%; 
+            position: relative; 
+            z-index: 1; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 85vh; 
+        }
 
         .main-title {
             font-size: 48px;
             font-weight: 800;
             margin-bottom: 12px;
+            margin-top: 10vh;
             background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -55,6 +79,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            backdrop-filter: blur(5px);
         }
 
         .card:hover { transform: translateY(-8px); box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5); }
@@ -92,6 +117,23 @@
             background: linear-gradient(135deg, #a855f7, #6366f1); 
             color: white; 
             box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+        }
+
+        /* ДОБАВЛЕНО: Блок автора */
+        .author-footer {
+            margin-top: auto;
+            padding-top: 50px;
+            padding-bottom: 20px;
+            font-size: 14px;
+            color: #64748b;
+            text-align: center;
+            letter-spacing: 0.5px;
+            line-height: 1.6;
+        }
+        
+        .author-footer span {
+            color: #38bdf8;
+            font-weight: 700;
         }
 
         #map-screen { display: none; height: 100vh; width: 100vw; position: relative; }
@@ -256,27 +298,35 @@
 
 <div id="start-screen">
     <div class="menu-content">
-        <h1 class="main-title">Интерактивная География</h1>
-        <p class="main-subtitle">Исследуй карту мира, изучай данные всех 195 стран и проходи тест</p>
+        <div>
+            <h1 class="main-title">Интерактивная География</h1>
+            <p class="main-subtitle">Исследуй карту мира, изучай данные всех 195 стран и проходи тест</p>
 
-        <div class="menu-cards">
-            <div class="card card-map-style" id="open-map-card">
-                <div>
-                    <div class="card-icon">🌍</div>
-                    <h3>Карта мира</h3>
-                    <p>Интерактивные границы стран, быстрый поиск и подробные факты о каждом государстве.</p>
+            <div class="menu-cards">
+                <div class="card card-map-style" id="open-map-card">
+                    <div>
+                        <div class="card-icon">🌍</div>
+                        <h3>Карта мира</h3>
+                        <p>Интерактивные границы стран, быстрый поиск и подробные факты о каждом государстве.</p>
+                    </div>
+                    <button type="button" class="card-btn btn-primary" id="open-map-btn">Открыть карту →</button>
                 </div>
-                <button type="button" class="card-btn btn-primary" id="open-map-btn">Открыть карту →</button>
-            </div>
 
-            <div class="card card-quiz-style" id="open-quiz-card">
-                <div>
-                    <div class="card-icon">⚡🏆</div>
-                    <h3>Викторина</h3>
-                    <p>Проверь свои знания флагов, столиц и географических фактов в динамичном тесте!</p>
+                <div class="card card-quiz-style" id="open-quiz-card">
+                    <div>
+                        <div class="card-icon">⚡🏆</div>
+                        <h3>Викторина</h3>
+                        <p>Проверь свои знания флагов, столиц и географических фактов в динамичном тесте!</p>
+                    </div>
+                    <a href="quiz.html" class="card-btn btn-quiz">Начать игру →</a>
                 </div>
-                <a href="quiz.html" class="card-btn btn-quiz">Начать игру →</a>
             </div>
+        </div>
+
+        <!-- ДОБАВЛЕНО: Блок с автором -->
+        <div class="author-footer">
+            Индивидуальный проект по географии<br>
+            Выполнил: <span>ученик 9 класса [Твоя Фамилия Имя]</span>
         </div>
     </div>
 </div>
@@ -632,7 +682,7 @@
         function initMap() {
             map = L.map('map', { minZoom: 2, maxZoom: 7 }).setView([20, 0], 2);
 
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?api_key=cb1_4fpv_1_b5c57fda6ae3f935a7b0ac4f', {
                 attribution: '&copy; OpenStreetMap &copy; CARTO',
                 maxZoom: 19
             }).addTo(map);
