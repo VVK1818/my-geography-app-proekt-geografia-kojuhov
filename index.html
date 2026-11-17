@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Интерактивная География</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -30,7 +31,7 @@
             overflow: hidden;
         }
 
-        /* ДОБАВЛЕНО: Фоновая карта */
+        /* Фоновая карта */
         #start-screen::before {
             content: "";
             position: absolute;
@@ -53,11 +54,23 @@
             min-height: 85vh; 
         }
 
+        .badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
         .main-title {
             font-size: 48px;
             font-weight: 800;
             margin-bottom: 12px;
-            margin-top: 10vh;
+            margin-top: 5vh;
             background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -84,7 +97,7 @@
 
         .card:hover { transform: translateY(-8px); box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5); }
         .card-map-style:hover { border-color: #38bdf8; box-shadow: 0 20px 35px -10px rgba(56, 189, 248, 0.3); }
-
+        
         .card-quiz-style {
             background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(88, 28, 135, 0.4));
             border: 1px solid rgba(192, 132, 252, 0.3);
@@ -92,8 +105,15 @@
 
         .card-quiz-style:hover { border-color: #c084fc; box-shadow: 0 20px 35px -10px rgba(192, 132, 252, 0.4); }
 
+        .card-random-style {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(20, 83, 45, 0.4));
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+        
+        .card-random-style:hover { border-color: #4ade80; box-shadow: 0 20px 35px -10px rgba(74, 222, 128, 0.4); }
+
         .card-icon { font-size: 42px; margin-bottom: 16px; }
-        .card h3 { font-size: 24px; margin-bottom: 10px; color: #f8fafc; font-weight: 700; }
+        .card h3 { font-size: 22px; margin-bottom: 10px; color: #f8fafc; font-weight: 700; }
         .card p { font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 24px; }
 
         .card-btn {
@@ -119,10 +139,42 @@
             box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
         }
 
-        /* ДОБАВЛЕНО: Блок автора */
+        .btn-random {
+            background: linear-gradient(135deg, #22c55e, #10b981);
+            color: white;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+        }
+
+        /* Блок факта дня */
+        .fact-box {
+            margin-top: 40px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px dashed #38bdf8;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: left;
+            backdrop-filter: blur(5px);
+        }
+
+        .fact-title {
+            color: #38bdf8;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .fact-text {
+            font-size: 15px;
+            color: #e2e8f0;
+            line-height: 1.5;
+        }
+
+        /* Блок автора */
         .author-footer {
             margin-top: auto;
-            padding-top: 50px;
+            padding-top: 40px;
             padding-bottom: 20px;
             font-size: 14px;
             color: #64748b;
@@ -136,6 +188,7 @@
             font-weight: 700;
         }
 
+        /* --- СТИЛИ ДЛЯ КАРТЫ --- */
         #map-screen { display: none; height: 100vh; width: 100vw; position: relative; }
 
         header {
@@ -180,7 +233,14 @@
         .btn-back:hover { background: #475569; }
         .btn-quiz-sm { background: linear-gradient(135deg, #a855f7, #6366f1); color: white; }
 
+        /* Ночная карта */
         #map { height: 100vh; width: 100vw; background: #0f172a; }
+        #map {
+            background: #05050a !important; /* Почти чёрная вода */
+        }
+        .leaflet-layer {
+            filter: grayscale(100%) invert(90%) contrast(110%) brightness(80%);
+        }
 
         .fullscreen-overlay {
             display: none;
@@ -299,6 +359,7 @@
 <div id="start-screen">
     <div class="menu-content">
         <div>
+            <div class="badge">В базе: 195 стран</div>
             <h1 class="main-title">Интерактивная География</h1>
             <p class="main-subtitle">Исследуй карту мира, изучай данные всех 195 стран и проходи тест</p>
 
@@ -320,10 +381,23 @@
                     </div>
                     <a href="quiz.html" class="card-btn btn-quiz">Начать игру →</a>
                 </div>
+                
+                <div class="card card-random-style" id="open-random-card">
+                    <div>
+                        <div class="card-icon">🎲</div>
+                        <h3>Рулетка</h3>
+                        <p>Не знаешь, какую страну изучить? Доверься судьбе и открой случайное государство!</p>
+                    </div>
+                    <button type="button" class="card-btn btn-random" id="open-random-btn">Испытать удачу →</button>
+                </div>
+            </div>
+
+            <div class="fact-box" id="daily-fact-box">
+                <div class="fact-title">💡 Факт дня</div>
+                <div class="fact-text" id="daily-fact-text">Загрузка интересного факта...</div>
             </div>
         </div>
 
-        <!-- ДОБАВЛЕНО: Блок с автором -->
         <div class="author-footer">
             Индивидуальный проект по географии<br>
             Выполнил: <span>ученик 9 класса [Твоя Фамилия Имя]</span>
@@ -601,9 +675,17 @@
         var closeMapBtn = document.getElementById('close-map-btn');
         var countrySearch = document.getElementById('country-search');
         var openQuizCard = document.getElementById('open-quiz-card');
+        var openRandomBtn = document.getElementById('open-random-btn');
+        var openRandomCard = document.getElementById('open-random-card');
 
         var fullscreenOverlay = document.getElementById('fullscreen-info-overlay');
         var closeFullscreenBtn = document.getElementById('close-fullscreen-btn');
+
+        // Генерируем случайный факт дня при загрузке
+        var countryKeys = Object.keys(COUNTRIES_DB);
+        var randomKey = countryKeys[Math.floor(Math.random() * countryKeys.length)];
+        var randomCountry = COUNTRIES_DB[randomKey];
+        document.getElementById('daily-fact-text').innerHTML = `<b>${randomCountry.nameRu}:</b> ${randomCountry.facts}`;
 
         function openMap() {
             startScreen.style.display = 'none';
@@ -623,10 +705,21 @@
             startScreen.style.display = 'flex';
         }
 
+        function openRandomCountry() {
+            var randomKey = countryKeys[Math.floor(Math.random() * countryKeys.length)];
+            showCountryInfo(randomKey, COUNTRIES_DB[randomKey]);
+        }
+
         openMapCard.addEventListener('click', openMap);
         openMapBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             openMap();
+        });
+        
+        openRandomCard.addEventListener('click', openRandomCountry);
+        openRandomBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openRandomCountry();
         });
 
         closeMapBtn.addEventListener('click', closeMap);
@@ -655,8 +748,8 @@
                     highlightedLayer = layer;
                     layer.setStyle({
                         weight: 3,
-                        color: '#ef4444',
-                        fillOpacity: 0.6
+                        color: '#c084fc',
+                        fillOpacity: 0.8
                     });
 
                     var rawName = getCountryRawName(layer.feature);
@@ -679,23 +772,61 @@
             return 'un';
         }
 
+        function showCountryInfo(rawName, data) {
+            if (data) {
+                document.getElementById('country-name-ru').innerText = data.nameRu;
+                document.getElementById('country-name-en').innerText = rawName;
+                document.getElementById('country-capital').innerText = data.capital;
+                document.getElementById('country-population').innerText = data.pop;
+                document.getElementById('country-area').innerText = data.area;
+                document.getElementById('country-region').innerText = data.region;
+                document.getElementById('country-language').innerText = data.lang;
+                document.getElementById('country-currency').innerText = data.currency;
+                document.getElementById('country-gov').innerText = data.gov;
+                document.getElementById('country-gdp').innerText = data.gdp;
+                document.getElementById('country-tz').innerText = data.tz;
+                document.getElementById('country-code-domain').innerText = data.code;
+                document.getElementById('country-fact').innerText = data.facts;
+                document.getElementById('country-flag').src = `flags/${data.flag}.svg`;
+            } else {
+                document.getElementById('country-name-ru').innerText = rawName;
+                document.getElementById('country-name-en').innerText = rawName;
+                document.getElementById('country-capital').innerText = "Столица государства";
+                document.getElementById('country-population').innerText = "Данные по населению";
+                document.getElementById('country-area').innerText = "Территория государства";
+                document.getElementById('country-region').innerText = "Мировой регион";
+                document.getElementById('country-language').innerText = "Официальный язык";
+                document.getElementById('country-currency').innerText = "Национальная валюта";
+                document.getElementById('country-gov').innerText = "Государственное устройство";
+                document.getElementById('country-gdp').innerText = "ВВП государства";
+                document.getElementById('country-tz').innerText = "Часовые пояса";
+                document.getElementById('country-code-domain').innerText = "Международный код";
+                document.getElementById('country-fact').innerText = "Уникальное государство со своей выраженной культурой, традициями и архитектурным наследием.";
+                
+                var iso2 = 'un'; 
+                var flagCode = iso2 !== 'un' ? iso2 : 'un';
+                document.getElementById('country-flag').src = `flags/${flagCode}.svg`;
+            }
+            fullscreenOverlay.style.display = 'block';
+        }
+
         function initMap() {
             map = L.map('map', { minZoom: 2, maxZoom: 7 }).setView([20, 0], 2);
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?api_key=cb1_4fpv_1_b5c57fda6ae3f935a7b0ac4f', {
-                attribution: '&copy; OpenStreetMap &copy; CARTO',
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap',
                 maxZoom: 19
             }).addTo(map);
 
             var infoDiv = document.getElementById('country-info');
 
-            function style(feature) {
+                    function style(feature) {
                 return {
-                    fillColor: '#3b82f6',
+                    fillColor: '#60a5fa', /* Светло-голубая начинка */
                     weight: 1.5,
                     opacity: 1,
-                    color: '#1e3a8a',
-                    fillOpacity: 0.3
+                    color: '#1e3a8a',     /* Тёмно-синяя обводка как в оригинале */
+                    fillOpacity: 0.5      /* Наполовину прозрачная начинка */
                 };
             }
 
@@ -707,10 +838,10 @@
                 var layer = e.target;
                 highlightedLayer = layer;
 
-                layer.setStyle({
+                               layer.setStyle({
                     weight: 3,
-                    color: '#ef4444',
-                    fillOpacity: 0.6
+                    color: '#38bdf8', /* Голубая обводка при наведении */
+                    fillOpacity: 0.8
                 });
 
                 var rawName = getCountryRawName(layer.feature);
@@ -729,47 +860,10 @@
             function onCountryClick(e) {
                 var layer = e.target;
                 var rawName = getCountryRawName(layer.feature);
-                var iso2 = getIso2(layer.feature);
-
+                
                 map.fitBounds(layer.getBounds());
-
                 var data = COUNTRIES_DB[rawName];
-
-                if (data) {
-                    document.getElementById('country-name-ru').innerText = data.nameRu;
-                    document.getElementById('country-name-en').innerText = rawName;
-                    document.getElementById('country-capital').innerText = data.capital;
-                    document.getElementById('country-population').innerText = data.pop;
-                    document.getElementById('country-area').innerText = data.area;
-                    document.getElementById('country-region').innerText = data.region;
-                    document.getElementById('country-language').innerText = data.lang;
-                    document.getElementById('country-currency').innerText = data.currency;
-                    document.getElementById('country-gov').innerText = data.gov;
-                    document.getElementById('country-gdp').innerText = data.gdp;
-                    document.getElementById('country-tz').innerText = data.tz;
-                    document.getElementById('country-code-domain').innerText = data.code;
-                    document.getElementById('country-fact').innerText = data.facts;
-                    document.getElementById('country-flag').src = `flags/${data.flag}.svg`;
-                } else {
-                    document.getElementById('country-name-ru').innerText = rawName;
-                    document.getElementById('country-name-en').innerText = rawName;
-                    document.getElementById('country-capital').innerText = "Столица государства";
-                    document.getElementById('country-population').innerText = "Данные по населению";
-                    document.getElementById('country-area').innerText = "Территория государства";
-                    document.getElementById('country-region').innerText = "Мировой регион";
-                    document.getElementById('country-language').innerText = "Официальный язык";
-                    document.getElementById('country-currency').innerText = "Национальная валюта";
-                    document.getElementById('country-gov').innerText = "Государственное устройство";
-                    document.getElementById('country-gdp').innerText = "ВВП государства";
-                    document.getElementById('country-tz').innerText = "Часовые пояса";
-                    document.getElementById('country-code-domain').innerText = "Международный код";
-                    document.getElementById('country-fact').innerText = "Уникальное государство со своей выраженной культурой, традициями и архитектурным наследием.";
-                    
-                    var flagCode = iso2 !== 'un' ? iso2 : 'un';
-                    document.getElementById('country-flag').src = `flags/${flagCode}.svg`;
-                }
-
-                fullscreenOverlay.style.display = 'block';
+                showCountryInfo(rawName, data);
             }
 
             function onEachFeature(feature, layer) {
